@@ -3,16 +3,38 @@
   "version": "0.0.0",
   "description": "my awesome project",
   "license": "MIT",
+  "main": "dist/index.js",
+  "module": "index.js",
   "scripts": {
-    "prepare": "npm test",
+    "prepare": "npm test && npm run build",
+    "start": "docz dev",
+    "prebuild": "rm -rf dist",
+    "build": "rollup -f cjs $npm_package_module -o $npm_package_main",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch --notify"
   },
   "files": [
-    "lib"
+    "index.js",
+    "dist"
   ],
+  "jest": {
+    "preset": "rollup-jest",
+    "testPathIgnorePatterns": [
+      "/.docz/"
+    ]
+  },
   "devDependencies": {
-    "jest": "^25.1.0"
+    "docz": "^2.3.0-alpha.13",
+    "jest": "^25.1.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "rollup": "^1.32.0",
+    "rollup-jest": "^0.0.2",
+    "standard-version": "^7.1.0"
+  },
+  "dependencies": {
+    "compute-scroll-into-view": "^1.0.13",
+    "wobble": "^1.5.1"
   }
 }
