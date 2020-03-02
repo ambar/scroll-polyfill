@@ -1,8 +1,5 @@
 import polyfill from './index'
 
-// ignore `Error: Not implemented` in jsdom
-window.scroll = () => {}
-
 const scrollingElement = document.documentElement
 const nativeMethods = [
   [window, 'scroll'],
