@@ -29,9 +29,17 @@ const runScrollOptions = (target, {left, top, behavior}) => {
   }
 }
 
-const spring = (fromValue, toValue, config, update) =>
+const defaultSpringConfig = {
+  stiffness: 170,
+  damping: 26,
+  mass: 1,
+  restVelocityThreshold: 0.01,
+  restDisplacementThreshold: 0.1,
+}
+
+const spring = (fromValue, toValue, update) =>
   new Promise(r =>
-    new Spring({...config, fromValue, toValue})
+    new Spring({...defaultSpringConfig, fromValue, toValue})
       .onUpdate(s => update(s.currentValue))
       .onStop(() => r())
       .start()
@@ -49,7 +57,7 @@ const smoothScroll = (target, x, y) => {
     if (startX === targetX) {
       return
     }
-    return spring(startX, targetX, config, v => (target.scrollLeft = v))
+    return spring(startX, targetX, v => (target.scrollLeft = v))
   }
 
   const scrollY = () => {
@@ -61,7 +69,7 @@ const smoothScroll = (target, x, y) => {
     if (startY === targetY) {
       return
     }
-    return spring(startY, targetY, config, v => (target.scrollTop = v))
+    return spring(startY, targetY, v => (target.scrollTop = v))
   }
 
   return Promise.all([scrollX(), scrollY()])
