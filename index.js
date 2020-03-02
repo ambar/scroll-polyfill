@@ -46,8 +46,6 @@ const spring = (fromValue, toValue, update) =>
   )
 
 const smoothScroll = (target, x, y) => {
-  const config = {stiffness: 120, damping: 20, mass: 1}
-
   const scrollX = () => {
     if (isNaN(x)) {
       return
@@ -79,64 +77,106 @@ const clamp = (value, min, max) => {
   return Math.min(Math.max(value, min), max)
 }
 
-const isObject = function(val) {
+const isObject = val => {
   const type = typeof val
   return (type === 'object' && val != null) || type === 'function'
 }
 
+const isWindow = obj => obj.window === obj
+
 // @see: https://codesandbox.io/s/assert-scrolltooptions-y5bm4
-const assertScrollToOptions = (options, scope, method) => {
+const assertScrollToOptions = (options, target, method) => {
   if (!isObject(options)) {
+    const ctor = isWindow(target) ? 'Window' : 'Element'
     throw new TypeError(
-      `Failed to execute '${method}' on '${scope.constructor.name}': parameter 1 ('options') is not an object.`
+      `Failed to execute '${method}' on '${ctor}': parameter 1 ('options') is not an object.`
     )
   }
 }
 
+const normTarget = obj =>
+  isWindow(obj)
+    ? // more robust: https://github.com/mathiasbynens/document.scrollingElement
+      obj.document.scrollingElement || obj.document.documentElement
+    : obj
+
+const isDetached = target => {
+  return !(target && target.ownerDocument.documentElement.contains(target))
+}
+
+const createScrollTo = (method, mapOptions) => {
+  return (target, options) => {
+    if (options == null) {
+      return
+    }
+    assertScrollToOptions(options, target, method)
+
+    target = normTarget(target)
+    if (isDetached(target)) {
+      return
+    }
+
+    const opts = {
+      ...defaultScrollToOptions,
+      ...options,
+    }
+    return runScrollOptions(
+      target,
+      mapOptions ? mapOptions(opts, target) : opts
+    )
+  }
+}
+
+export const scrollTo = createScrollTo('scrollTo')
+export const scroll = createScrollTo('scroll')
+export const scrollBy = createScrollTo('scrollBy', (opts, target) => {
+  if (!isNaN(opts.left)) {
+    opts.left += target.scrollLeft
+  }
+  if (!isNaN(opts.top)) {
+    opts.top += target.scrollTop
+  }
+  return opts
+})
+
+export const scrollIntoView = (target, options) => {
+  target = normTarget(target)
+  if (isDetached(target)) {
+    return
+  }
+
+  const opts = {
+    ...defaultScrollIntoViewOptions,
+    ...(isObject(options)
+      ? options
+      : !(options == null || Boolean(options)) && {block: 'end'}),
+  }
+  return Promise.all(
+    computeScrollIntoView(target, opts).map(({el, top, left}) =>
+      runScrollOptions(el, {left, top, behavior: opts.behavior})
+    )
+  )
+}
+
 const polyfillScrollToOptions = (scope, method) => {
   const nativeMethod = scope[method]
-  const getTarget = context =>
-    context === window
-      ? // more robust: https://github.com/mathiasbynens/document.scrollingElement
-        document.scrollingElement || document.documentElement
-      : context
   const isScrollBy = method === 'scrollBy'
   const fallbackMethod = isScrollBy
     ? function(x, y) {
         // scrollBy(NaN, NaN) => no effect
-        if (!isNaN(x)) {
-          getTarget(this).scrollLeft += x
-        }
-        if (!isNaN(y)) {
-          getTarget(this).scrollTop += y
-        }
+        scrollBy(this, {
+          left: isNaN(x) ? undefined : Number(x),
+          top: isNaN(y) ? undefined : Number(y),
+        })
       }
     : function(x, y) {
         // scroll(NaN, NaN) => scroll(0, 0)
-        getTarget(this).scrollLeft = Number(x) || 0
-        getTarget(this).scrollTop = Number(y) || 0
+        scrollTo(this, {left: Number(x) || 0, top: Number(y) || 0})
       }
 
   scope[method] = function() {
     if (arguments.length === 1) {
-      const options = arguments[0]
-      if (options != null) {
-        assertScrollToOptions(options, scope, method)
-        const target = getTarget(this)
-        const opts = {
-          ...defaultScrollToOptions,
-          ...options,
-        }
-        if (isScrollBy) {
-          if (!isNaN(opts.left)) {
-            opts.left += target.scrollLeft
-          }
-          if (!isNaN(opts.top)) {
-            opts.top += target.scrollTop
-          }
-        }
-        return runScrollOptions(target, opts)
-      }
+      return (isScrollBy ? scrollBy : scrollTo)(this, arguments[0])
     }
     return (nativeMethod || fallbackMethod).apply(this, arguments)
   }
@@ -146,39 +186,15 @@ const polyfillScrollToOptions = (scope, method) => {
   }
 }
 
-const isDetached = target => {
-  return !(target && target.ownerDocument.documentElement.contains(target))
-}
-
-const scrollIntoView = (target, opts) => {
-  if (isDetached(target)) {
-    return
-  }
-  return Promise.all(
-    computeScrollIntoView(target, opts).map(({el, top, left}) =>
-      runScrollOptions(el, {left, top, behavior: opts.behavior})
-    )
-  )
-}
-
 const polyfillScrollToViewOptions = () => {
   const nativeMethod = Element.prototype.scrollIntoView
   const fallbackMethod = function(alignToTop) {
-    return scrollIntoView(
-      this,
-      alignToTop == null || Boolean(alignToTop)
-        ? defaultScrollIntoViewOptions
-        : {...defaultScrollIntoViewOptions, block: 'end'}
-    )
+    return scrollIntoView(this, alignToTop)
   }
   Element.prototype.scrollIntoView = function() {
     const options = arguments[0]
     if (isObject(options)) {
-      const opts = {
-        ...defaultScrollIntoViewOptions,
-        ...options,
-      }
-      return scrollIntoView(this, opts)
+      return scrollIntoView(this, options)
     }
     return (nativeMethod || fallbackMethod).apply(this, arguments)
   }
