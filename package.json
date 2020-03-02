@@ -1,6 +1,6 @@
 {
   "name": "scroll-polyfill",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A scroll method and options polyfill",
   "license": "MIT",
   "main": "dist/index.js",
