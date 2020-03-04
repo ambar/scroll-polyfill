@@ -1,6 +1,13 @@
 import polyfill from './index'
 
 const scrollingElement = document.documentElement
+Object.defineProperties(scrollingElement, {
+  scrollHeight: {value: 2000},
+  scrollWidth: {value: 2000},
+  clientWidth: {value: 1680},
+  clientHeight: {value: 800},
+})
+
 const nativeMethods = [
   [window, 'scroll'],
   [window, 'scrollBy'],
