@@ -15,7 +15,7 @@ const defaultScrollIntoViewOptions = {
   inline: 'nearest',
 }
 
-const runScrollOptions = (target, {left, top, behavior}) => {
+const doScroll = (target, left, top, behavior) => {
   if (behavior === 'smooth') {
     return smoothScroll(target, left, top)
   }
@@ -50,27 +50,53 @@ const smoothScroll = (target, x, y) => {
     if (isNaN(x)) {
       return
     }
-    const {scrollLeft: startX, scrollWidth, clientWidth} = target
-    const targetX = clamp(x, 0, scrollWidth - clientWidth)
-    if (startX === targetX) {
+    const startX = target.scrollLeft
+    if (startX === x) {
       return
     }
-    return spring(startX, targetX, v => (target.scrollLeft = v))
+    return spring(startX, x, v => (target.scrollLeft = v))
   }
 
   const scrollY = () => {
     if (isNaN(y)) {
       return
     }
-    const {scrollTop: startY, scrollHeight, clientHeight} = target
-    const targetY = clamp(y, 0, scrollHeight - clientHeight)
-    if (startY === targetY) {
+    const startY = target.scrollTop
+    if (startY === y) {
       return
     }
-    return spring(startY, targetY, v => (target.scrollTop = v))
+    return spring(startY, y, v => (target.scrollTop = v))
   }
 
   return Promise.all([scrollX(), scrollY()])
+}
+
+const clampOptions = (target, {left, top}) => {
+  const isRootScoller = target === getScrollingElement(target.ownerDocument)
+
+  const clampX = () => {
+    if (isNaN(left)) {
+      return
+    }
+    const scrollportWidth = isRootScoller
+      ? target.ownerDocument.documentElement.clientWidth // for IE & Edge
+      : target.clientWidth
+    const scrollLeftMax = target.scrollWidth - scrollportWidth
+    return clamp(left, 0, scrollLeftMax)
+  }
+
+  const clampY = () => {
+    if (isNaN(top)) {
+      return
+    }
+    const scrollportHeight = isRootScoller
+      ? target.ownerDocument.documentElement.clientHeight
+      : target.clientHeight
+    const scrollTopMax = target.scrollHeight - scrollportHeight
+    return clamp(top, 0, scrollTopMax)
+  }
+
+  return {left: clampX(), top: clampY()}
 }
 
 const clamp = (value, min, max) => {
@@ -94,11 +120,13 @@ const assertScrollToOptions = (options, target, method) => {
   }
 }
 
+const getScrollingElement = doc => {
+  // more robust: https://github.com/mathiasbynens/document.scrollingElement
+  return doc.scrollingElement || doc.documentElement
+}
+
 const normTarget = obj =>
-  isWindow(obj)
-    ? // more robust: https://github.com/mathiasbynens/document.scrollingElement
-      obj.document.scrollingElement || obj.document.documentElement
-    : obj
+  isWindow(obj) ? getScrollingElement(obj.document) : obj
 
 const isDetached = target => {
   return !(target && target.ownerDocument.documentElement.contains(target))
@@ -120,10 +148,10 @@ const createScrollTo = (method, mapOptions) => {
       ...defaultScrollToOptions,
       ...options,
     }
-    return runScrollOptions(
-      target,
-      mapOptions ? mapOptions(opts, target) : opts
-    )
+
+    const finalOpts = mapOptions ? mapOptions(opts, target) : opts
+    const {left, top} = clampOptions(target, finalOpts)
+    return doScroll(target, left, top, finalOpts.behavior)
   }
 }
 
@@ -153,7 +181,7 @@ export const scrollIntoView = (target, options) => {
   }
   return Promise.all(
     computeScrollIntoView(target, opts).map(({el, top, left}) =>
-      runScrollOptions(el, {left, top, behavior: opts.behavior})
+      doScroll(el, left, top, opts.behavior)
     )
   )
 }

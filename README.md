@@ -33,6 +33,7 @@ scrollerChild.scrollIntoView({
   block: 'nearest',
   inline: 'start',
 })
+document.body.scrollIntoView(false)
 ```
 
 ### [Ponyfill](https://ponyfill.com/)
