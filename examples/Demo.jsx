@@ -1,5 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react'
-import {Global} from '@emotion/core'
+/** @jsx jsx */
+import {jsx, Global} from '@emotion/react'
 import install from '../index'
 
 const Cell = ({children, ...props}) => (
@@ -66,7 +67,7 @@ export default () => {
     cellScrollIntoView(5)
   }, [])
 
-  const cellScrollIntoView = number => {
+  const cellScrollIntoView = (number) => {
     gridRef.current.children[number - 1].scrollIntoView({
       behavior,
       block,
@@ -74,7 +75,7 @@ export default () => {
     })
   }
 
-  const cellScrollTo = number => {
+  const cellScrollTo = (number) => {
     scrollerRef.current.scrollIntoView({block: 'center', inline: 'center'})
     const cell = gridRef.current.children[number - 1]
     scrollerRef.current.scrollTo({
@@ -125,7 +126,7 @@ export default () => {
             flexWrap: 'wrap',
           }}
         >
-          {[...Array(12).keys()].map(n => (
+          {[...Array(12).keys()].map((n) => (
             <Cell key={n}>{n + 1}</Cell>
           ))}
         </div>
@@ -152,7 +153,7 @@ export default () => {
                 name="polyfillMode"
                 value="default"
                 checked={polyfillMode === 'default'}
-                onChange={e => {
+                onChange={(e) => {
                   setPolyfillMode(e.target.value)
                 }}
               />{' '}
@@ -164,7 +165,7 @@ export default () => {
                 name="polyfillMode"
                 value="force"
                 checked={polyfillMode === 'force'}
-                onChange={e => {
+                onChange={(e) => {
                   setPolyfillMode(e.target.value)
                 }}
               />{' '}
@@ -176,7 +177,7 @@ export default () => {
                 name="polyfillMode"
                 value="off"
                 checked={polyfillMode === 'off'}
-                onChange={e => {
+                onChange={(e) => {
                   setPolyfillMode(e.target.value)
                 }}
               />{' '}
@@ -192,7 +193,7 @@ export default () => {
                 name="behavior"
                 value="smooth"
                 checked={behavior === 'smooth'}
-                onChange={e => {
+                onChange={(e) => {
                   setBehavior(e.target.value)
                 }}
               />{' '}
@@ -204,7 +205,7 @@ export default () => {
                 name="behavior"
                 value="auto"
                 checked={behavior === 'auto'}
-                onChange={e => {
+                onChange={(e) => {
                   setBehavior(e.target.value)
                 }}
               />{' '}
@@ -216,7 +217,7 @@ export default () => {
           </h2>
           <div>
             block:{' '}
-            <select value={block} onChange={e => setBlock(e.target.value)}>
+            <select value={block} onChange={(e) => setBlock(e.target.value)}>
               <option value="nearest" checked={block === 'nearest'}>
                 nearest
               </option>
@@ -231,7 +232,7 @@ export default () => {
               </option>
             </select>{' '}
             inline:{' '}
-            <select value={inline} onChange={e => setInline(e.target.value)}>
+            <select value={inline} onChange={(e) => setInline(e.target.value)}>
               <option value="nearest" checked={inline === 'nearest'}>
                 nearest
               </option>
