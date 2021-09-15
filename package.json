@@ -4,19 +4,21 @@
   "description": "A scroll method and options polyfill",
   "repository": "ambar/scroll-polyfill",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "index.js",
+  "source": "index.ts",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "prepare": "npm test && npm run build",
     "start": "vite --root examples",
     "prebuild": "rm -rf dist",
-    "build": "rollup -f cjs $npm_package_module -o $npm_package_main",
+    "build": "rollup -c",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch --notify"
   },
   "files": [
-    "index.js",
     "dist"
   ],
   "jest": {
@@ -30,7 +32,9 @@
     "jest": "^27.1.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "rollup": "^1.32.0",
+    "rollup": "^2.56.3",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typescript": "^4.4.3",
     "vite": "^2.5.6"
   },
   "dependencies": {

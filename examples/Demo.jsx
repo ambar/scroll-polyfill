@@ -49,7 +49,7 @@ const getRelativeOffset = (element, offsetParent) => {
   }
 }
 
-export default () => {
+export default function Demo() {
   const scrollerRef = useRef()
   const gridRef = useRef()
   const [behavior, setBehavior] = useState('smooth')
@@ -86,20 +86,18 @@ export default () => {
   }
 
   return (
-    <div>
+    <div
+      css={{
+        maxWidth: 1280,
+        margin: '0 auto',
+      }}
+    >
       <Global
         styles={{
           body: {
             ...arrowPatternStyle,
             width: '400vw',
             height: '800vh',
-          },
-          ':root': {
-            '--theme-ui-colors-text': '#222',
-            '--theme-ui-colors-border': 'transparent',
-            '--theme-ui-colors-background': 'transparent',
-            '--theme-ui-colors-header-bg': 'transparent',
-            '--theme-ui-colors-sidebar-bg': 'transparent',
           },
         }}
       />
