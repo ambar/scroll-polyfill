@@ -1,9 +1,12 @@
 # scroll-polyfill
 
-Scroll opitons polyfill:
+[![Coverage Status](https://coveralls.io/repos/github/ambar/scroll-polyfill/badge.svg?branch=master)](https://coveralls.io/github/ambar/scroll-polyfill?branch=master)
+[![npm version](https://badgen.net/npm/v/scroll-polyfill)](https://www.npmjs.com/package/scroll-polyfill)
+
+Scroll options polyfill:
 
 - Add [`ScrollToOptions`](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions) polyfill for `Element.protype.{scroll|scrollTo|scrollBy}`, `window.{scroll|scrollTo|scrollBy}`
-- Add [`ScrollIntoViewOptions`](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollInToView) polyfill for `Element.protype.scrollIntoView`
+- Add [`ScrollIntoViewOptions`](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollInToView) polyfill for `Element.prototype.scrollIntoView`
 
 ## Install
 
