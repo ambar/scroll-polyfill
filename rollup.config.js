@@ -22,7 +22,7 @@ export default [
         tsconfigOverride: {
           include: ['**/*'],
           exclude: ['**/*.spec.*', '**/__tests__'],
-          target: 'ES6',
+          compilerOptions: {target: 'ES6'},
         },
       }),
     ],

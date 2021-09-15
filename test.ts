@@ -16,10 +16,13 @@ const nativeMethods = [
   [Element.prototype, 'scrollBy'],
   [Element.prototype, 'scrollTo'],
   [Element.prototype, 'scrollIntoView'],
+  // @ts-expect-error
 ].map(([scope, method]) => [scope, method, scope[method]])
 
+type Uninstall = ReturnType<typeof polyfill>
+
 describe('polyfill', () => {
-  let unpolyfill
+  let unpolyfill: Uninstall
   afterEach(() => {
     unpolyfill()
   })
@@ -46,7 +49,7 @@ describe('polyfill', () => {
 })
 
 describe('scrollToOptions', () => {
-  let unpolyfill
+  let unpolyfill: Uninstall
   beforeAll(() => {
     unpolyfill = polyfill({force: true})
   })
@@ -62,14 +65,18 @@ describe('scrollToOptions', () => {
 
   test('parameter', async () => {
     const okValues = [1, true, '', Symbol()]
-    okValues.forEach(value => {
+    okValues.forEach((value) => {
+      // @ts-expect-error not assignable
       expect(() => window.scroll(value)).toThrow(TypeError)
+      // @ts-expect-error not assignable
       expect(() => scrollingElement.scroll(value)).toThrow(TypeError)
     })
 
     const failValues = [null, undefined, [], {}, () => {}]
-    failValues.forEach(value => {
+    failValues.forEach((value) => {
+      // @ts-expect-error not assignable
       expect(() => window.scroll(value)).not.toThrow(TypeError)
+      // @ts-expect-error not assignable
       expect(() => scrollingElement.scroll(value)).not.toThrow(TypeError)
     })
   })
@@ -119,7 +126,7 @@ describe('scrollToOptions', () => {
 })
 
 describe('scrollIntoView', () => {
-  let unpolyfill
+  let unpolyfill: Uninstall
   beforeAll(() => {
     unpolyfill = polyfill({force: true})
   })
@@ -145,7 +152,8 @@ describe('scrollIntoView', () => {
       {},
       () => {},
     ]
-    failValues.forEach(value => {
+    failValues.forEach((value) => {
+      // @ts-expect-error not assignable
       expect(() => scrollingElement.scrollIntoView(value)).not.toThrow(
         TypeError
       )
