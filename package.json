@@ -1,6 +1,6 @@
 {
   "name": "scroll-polyfill",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "A scroll method and options polyfill",
   "repository": "ambar/scroll-polyfill",
   "license": "MIT",
