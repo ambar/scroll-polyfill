@@ -13,7 +13,7 @@
     "prepare": "npm test && npm run build",
     "start": "vite --root examples",
     "prebuild": "rm -rf dist",
-    "build": "rollup -c",
+    "build": "rollup -c && cd auto && yarn build",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch --notify"

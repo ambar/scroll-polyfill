@@ -1,0 +1,11 @@
+{
+  "name": "scroll-polyfill-auto",
+  "version": "1.0.0",
+  "source": "index.js",
+  "main": "./dist/auto.cjs.js",
+  "module": "./dist/auto.esm.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c ../rollup.config.js"
+  }
+}
