@@ -19,6 +19,8 @@
     "test:watch": "jest --watch --notify"
   },
   "files": [
+    "auto/package.json",
+    "auto/dist",
     "dist"
   ],
   "jest": {

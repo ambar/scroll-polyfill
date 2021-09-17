@@ -4,6 +4,9 @@
   "source": "index.js",
   "main": "./dist/auto.cjs.js",
   "module": "./dist/auto.esm.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "rollup -c ../rollup.config.js"
