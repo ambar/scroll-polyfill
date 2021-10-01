@@ -1,6 +1,5 @@
-import React, {useRef, useEffect, useState} from 'react'
-/** @jsx jsx */
-import {jsx, Global} from '@emotion/react'
+import {useRef, useEffect, useState} from 'react'
+import {Global} from '@emotion/react'
 import install from '../index'
 
 const Cell = ({children, ...props}) => (
@@ -40,6 +39,7 @@ const arrowPatternStyle = {
   backgroundSize: '128px 128px',
 }
 
+/*
 const getRelativeOffset = (element, offsetParent) => {
   const bcr = element.getBoundingClientRect()
   const baseBcr = offsetParent.getBoundingClientRect()
@@ -48,6 +48,7 @@ const getRelativeOffset = (element, offsetParent) => {
     top: bcr.top - baseBcr.top,
   }
 }
+*/
 
 export default function Demo() {
   const scrollerRef = useRef()
@@ -63,10 +64,6 @@ export default function Demo() {
     }
   }, [polyfillMode])
 
-  useEffect(() => {
-    cellScrollIntoView(5)
-  }, [])
-
   const cellScrollIntoView = (number) => {
     gridRef.current.children[number - 1].scrollIntoView({
       behavior,
@@ -74,6 +71,11 @@ export default function Demo() {
       inline,
     })
   }
+
+  useEffect(() => {
+    cellScrollIntoView(5)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const cellScrollTo = (number) => {
     scrollerRef.current.scrollIntoView({block: 'center', inline: 'center'})

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/unbound-method */
 import polyfill, {scrollIntoView, scrollTo} from './index'
 
 const scrollingElement = document.documentElement
@@ -8,16 +11,27 @@ Object.defineProperties(scrollingElement, {
   clientHeight: {value: 800},
 })
 
-const nativeMethods = [
-  [window, 'scroll'],
-  [window, 'scrollBy'],
-  [window, 'scrollTo'],
-  [Element.prototype, 'scroll'],
-  [Element.prototype, 'scrollBy'],
-  [Element.prototype, 'scrollTo'],
-  [Element.prototype, 'scrollIntoView'],
-  // @ts-expect-error
-].map(([scope, method]) => [scope, method, scope[method]])
+const windowMethods = [
+  ['scroll' as keyof Window, window.scroll],
+  ['scrollBy' as keyof Window, window.scrollBy],
+  ['scrollTo' as keyof Window, window.scrollTo],
+] as const
+
+const elementMethods = [
+  ['scroll' as keyof Element, Element.prototype.scroll],
+  ['scrollBy' as keyof Element, Element.prototype.scrollBy],
+  ['scrollTo' as keyof Element, Element.prototype.scrollTo],
+  ['scrollIntoView' as keyof Element, Element.prototype.scrollIntoView],
+] as const
+
+const expectInstall = (ok: boolean) => {
+  windowMethods.forEach(([name, fn]) => {
+    ;(ok ? expect(fn).not : expect(fn)).toBe(window[name])
+  })
+  elementMethods.forEach(([name, fn]) => {
+    ;(ok ? expect(fn).not : expect(fn)).toBe(Element.prototype[name])
+  })
+}
 
 type Uninstall = ReturnType<typeof polyfill>
 
@@ -30,21 +44,15 @@ describe('polyfill', () => {
   test('default install', () => {
     unpolyfill = polyfill()
     if ('scrollBehavior' in document.documentElement.style) {
-      nativeMethods.forEach(([scope, method, native]) =>
-        expect(scope[method]).toBe(native)
-      )
+      expectInstall(false)
     } else {
-      nativeMethods.forEach(([scope, method, native]) =>
-        expect(scope[method]).not.toBe(native)
-      )
+      expectInstall(true)
     }
   })
 
   test('force install', () => {
     unpolyfill = polyfill({force: true})
-    nativeMethods.forEach(([scope, method, native]) =>
-      expect(scope[method]).not.toBe(native)
-    )
+    expectInstall(true)
   })
 })
 
@@ -63,7 +71,7 @@ describe('scrollToOptions', () => {
     scrollingElement.scrollLeft = 0
   })
 
-  test('parameter', async () => {
+  test('parameter', () => {
     const okValues = [1, true, '', Symbol()]
     okValues.forEach((value) => {
       // @ts-expect-error not assignable
@@ -134,17 +142,18 @@ describe('scrollToOptions', () => {
     ])
   })
 
-  test('detached', async () => {
+  test('detached', () => {
     const div = document.createElement('div')
     const scrollTop = 1000
-    div!.scrollTop = 1000
+    div.scrollTop = 1000
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     scrollTo(div, {top: scrollTop})
-    expect(div!.scrollTop).toBe(scrollTop)
+    expect(div.scrollTop).toBe(scrollTop)
 
     document.body.appendChild(div)
     scrollTo(div, {top: scrollTop})
-    expect(div!.scrollTop).not.toBe(scrollTop)
+    expect(div.scrollTop).not.toBe(scrollTop)
 
     div.remove()
   })
@@ -185,7 +194,7 @@ describe('scrollIntoView', () => {
     scrollingElement.scrollLeft = 0
   })
 
-  test('parameter', async () => {
+  test('parameter', () => {
     const failValues = [
       1,
       true,
@@ -205,17 +214,17 @@ describe('scrollIntoView', () => {
     })
   })
 
-  test('detached', async () => {
+  test('detached', () => {
     const div = document.createElement('div')
     const scrollTop = 1000
-    scrollingElement!.scrollTop = scrollTop
+    scrollingElement.scrollTop = scrollTop
 
     scrollIntoView(div, {inline: 'start'})
-    expect(scrollingElement!.scrollTop).toBe(scrollTop)
+    expect(scrollingElement.scrollTop).toBe(scrollTop)
 
     document.body.appendChild(div)
     scrollIntoView(div, {inline: 'start'})
-    expect(scrollingElement!.scrollTop).not.toBe(scrollTop)
+    expect(scrollingElement.scrollTop).not.toBe(scrollTop)
 
     div.remove()
   })

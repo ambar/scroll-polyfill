@@ -1,3 +1,5 @@
+/* eslint-disable prefer-rest-params */
+/* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/no-empty-function,@typescript-eslint/no-non-null-assertion */
 import computeScrollIntoView from 'compute-scroll-into-view'
 import {Spring} from 'wobble'
 
@@ -117,7 +119,7 @@ const isObject = (val: unknown) => {
   return (type === 'object' && val != null) || type === 'function'
 }
 
-const isWindow = (obj: any) => obj.window === obj
+const isWindow = (obj: Window | Element) => (obj as Window).window === obj
 
 // @see: https://codesandbox.io/s/assert-scrolltooptions-y5bm4
 const assertScrollToOptions = (
@@ -197,7 +199,7 @@ export const scrollIntoView = (
   const opts = {
     ...defaultScrollIntoViewOptions,
     ...(isObject(options)
-      ? (options as object)
+      ? (options as ScrollIntoViewOptions)
       : !(options == null || Boolean(options)) && {block: 'end'}),
   } as ScrollIntoViewOptions
   return Promise.all(
@@ -216,20 +218,21 @@ const polyfillScrollToOptions = (
   const fallbackMethod = isScrollBy
     ? function (this: Window | Element, x: number, y: number) {
         // scrollBy(NaN, NaN) => no effect
-        scrollBy(this, {
+        return scrollBy(this, {
           left: isNaN(x) ? undefined : Number(x),
           top: isNaN(y) ? undefined : Number(y),
         })
       }
     : function (this: Window | Element, x: number, y: number) {
         // scroll(NaN, NaN) => scroll(0, 0)
-        scrollTo(this, {left: Number(x) || 0, top: Number(y) || 0})
+        return scrollTo(this, {left: Number(x) || 0, top: Number(y) || 0})
       }
 
   scope[method] = function () {
     if (arguments.length === 1) {
       return (isScrollBy ? scrollBy : scrollTo)(this, arguments[0])
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (nativeMethod || fallbackMethod).apply(this, arguments as any)
   }
 
@@ -239,15 +242,18 @@ const polyfillScrollToOptions = (
 }
 
 const polyfillScrollToViewOptions = () => {
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const nativeMethod = Element.prototype.scrollIntoView
   const fallbackMethod = function (this: Element, alignToTop?: boolean) {
     return scrollIntoView(this, alignToTop)
   }
   Element.prototype.scrollIntoView = function () {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const options = arguments[0]
     if (isObject(options)) {
       return scrollIntoView(this, options)
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (nativeMethod || fallbackMethod).apply(this, arguments as any)
   }
 

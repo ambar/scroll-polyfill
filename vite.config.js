@@ -1,9 +1,13 @@
-import reactRefresh from '@vitejs/plugin-react-refresh'
+import react from '@vitejs/plugin-react'
 
 /**
  * @type {import('vite').UserConfig}
  */
 export default {
   root: 'examples',
-  plugins: [reactRefresh()],
+  plugins: [
+    react({
+      jsxImportSource: '@emotion/react',
+    }),
+  ],
 }
