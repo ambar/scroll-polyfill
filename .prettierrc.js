@@ -1,1 +1,1 @@
-module.exports = require('recommended/config/prettier')
+module.exports = require('@recommended/prettier-config')
